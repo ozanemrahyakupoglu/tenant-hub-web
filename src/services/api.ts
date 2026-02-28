@@ -5,6 +5,7 @@ const API_BASE_URL = 'http://localhost:8080/api/v1';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
+  withCredentials: true, // httpOnly cookie'lerin her istekle gönderilmesi için
 });
 
 // Request interceptor: her isteğe accessToken ekle
@@ -16,7 +17,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: 401 gelirse refresh token ile yenile
+// Response interceptor: 401 gelirse refresh token (httpOnly cookie) ile yenile
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -25,23 +26,19 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        clearTokens();
-        window.location.href = '/login';
-        return Promise.reject(error);
-      }
-
       try {
-        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
+        // refreshToken httpOnly cookie olarak otomatik gönderilir
+        const { data } = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
 
-        setTokens(data.accessToken, data.refreshToken);
+        setAccessToken(data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
       } catch {
-        clearTokens();
+        clearAccessToken();
         window.location.href = '/login';
         return Promise.reject(error);
       }
@@ -51,14 +48,12 @@ api.interceptors.response.use(
   },
 );
 
-export function setTokens(accessToken: string, refreshToken: string) {
+export function setAccessToken(accessToken: string) {
   localStorage.setItem('accessToken', accessToken);
-  localStorage.setItem('refreshToken', refreshToken);
 }
 
-export function clearTokens() {
+export function clearAccessToken() {
   localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
 }
 
 export function getAccessToken() {
