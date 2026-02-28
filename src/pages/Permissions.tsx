@@ -12,6 +12,7 @@ import {
   type PermissionRequest,
   type PermissionListParams,
 } from '../services/permissionService';
+import { useAuth } from '../context/AuthContext';
 
 interface Filters {
   name?: string;
@@ -21,6 +22,11 @@ interface Filters {
 }
 
 export default function Permissions() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('PERMISSION_CREATE');
+  const canUpdate = hasPermission('PERMISSION_UPDATE');
+  const canDelete = hasPermission('PERMISSION_DELETE');
+
   const [data, setData] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -195,35 +201,41 @@ export default function Permissions() {
       sortOrder: sortField === 'createdDate' ? (sortOrder === 'asc' ? 'ascend' as const : 'descend' as const) : undefined,
       render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
     },
-    {
+    ...((canUpdate || canDelete) ? [{
       title: 'İşlemler',
       render: (_: unknown, record: Permission) => (
         <Space>
-          <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
-            Düzenle
-          </Button>
-          <Popconfirm
-            title="Bu yetkiyi silmek istediğinize emin misiniz?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Evet"
-            cancelText="Hayır"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Sil
+          {canUpdate && (
+            <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
+              Düzenle
             </Button>
-          </Popconfirm>
+          )}
+          {canDelete && (
+            <Popconfirm
+              title="Bu yetkiyi silmek istediğinize emin misiniz?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Evet"
+              cancelText="Hayır"
+            >
+              <Button type="link" danger icon={<DeleteOutlined />}>
+                Sil
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
-    },
+    }] : []),
   ];
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>Yetkiler</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-          Yeni Yetki
-        </Button>
+        {canCreate && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+            Yeni Yetki
+          </Button>
+        )}
       </div>
 
       <Card size="small" style={{ marginBottom: 16 }}>

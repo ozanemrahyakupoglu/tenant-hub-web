@@ -19,6 +19,7 @@ import {
   type RolePermissionResponse,
 } from '../services/rolePermissionService';
 import { getPermissions, type Permission } from '../services/permissionService';
+import { useAuth } from '../context/AuthContext';
 
 interface Filters {
   name?: string;
@@ -26,6 +27,11 @@ interface Filters {
 }
 
 export default function Roles() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('ROLE_CREATE');
+  const canUpdate = hasPermission('ROLE_UPDATE');
+  const canDelete = hasPermission('ROLE_DELETE');
+
   const [data, setData] = useState<Role[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -231,7 +237,7 @@ export default function Roles() {
       title: 'Atayan',
       dataIndex: 'createdBy',
     },
-    {
+    ...(canUpdate ? [{
       title: 'İşlem',
       render: (_: unknown, record: RolePermissionResponse) => (
         <Popconfirm
@@ -245,7 +251,7 @@ export default function Roles() {
           </Button>
         </Popconfirm>
       ),
-    },
+    }] : []),
   ];
 
   // --- Table columns ---
@@ -285,38 +291,46 @@ export default function Roles() {
       title: 'Oluşturan',
       dataIndex: 'createdBy',
     },
-    {
+    ...((canUpdate || canDelete) ? [{
       title: 'İşlemler',
       render: (_: unknown, record: Role) => (
         <Space>
-          <Button type="link" icon={<SafetyOutlined />} onClick={() => openPermissionDrawer(record)}>
-            Yetkiler
-          </Button>
-          <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
-            Düzenle
-          </Button>
-          <Popconfirm
-            title="Bu rolü silmek istediğinize emin misiniz?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Evet"
-            cancelText="Hayır"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Sil
+          {canUpdate && (
+            <Button type="link" icon={<SafetyOutlined />} onClick={() => openPermissionDrawer(record)}>
+              Yetkiler
             </Button>
-          </Popconfirm>
+          )}
+          {canUpdate && (
+            <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
+              Düzenle
+            </Button>
+          )}
+          {canDelete && (
+            <Popconfirm
+              title="Bu rolü silmek istediğinize emin misiniz?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Evet"
+              cancelText="Hayır"
+            >
+              <Button type="link" danger icon={<DeleteOutlined />}>
+                Sil
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
-    },
+    }] : []),
   ];
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>Roller</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-          Yeni Rol
-        </Button>
+        {canCreate && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+            Yeni Rol
+          </Button>
+        )}
       </div>
 
       <Card size="small" style={{ marginBottom: 16 }}>
@@ -396,27 +410,29 @@ export default function Roles() {
         open={drawerOpen}
         onClose={() => { setDrawerOpen(false); setDrawerRole(null); setRolePermissions([]); }}
       >
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          <Select
-            style={{ flex: 1 }}
-            placeholder="Yetki seçin..."
-            value={selectedPermissionId}
-            onChange={setSelectedPermissionId}
-            showSearch
-            optionFilterProp="label"
-            options={availablePermissions.map((p) => ({ value: p.id, label: p.name }))}
-            allowClear
-          />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAssignPermission}
-            loading={assigning}
-            disabled={!selectedPermissionId}
-          >
-            Ata
-          </Button>
-        </div>
+        {canUpdate && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <Select
+              style={{ flex: 1 }}
+              placeholder="Yetki seçin..."
+              value={selectedPermissionId}
+              onChange={setSelectedPermissionId}
+              showSearch
+              optionFilterProp="label"
+              options={availablePermissions.map((p) => ({ value: p.id, label: p.name }))}
+              allowClear
+            />
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleAssignPermission}
+              loading={assigning}
+              disabled={!selectedPermissionId}
+            >
+              Ata
+            </Button>
+          </div>
+        )}
 
         <Table
           rowKey="id"

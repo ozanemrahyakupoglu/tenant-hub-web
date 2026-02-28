@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Layout, Menu, Button, Typography, theme } from 'antd';
 import {
   DashboardOutlined,
@@ -11,26 +11,39 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
+import type { ReactNode } from 'react';
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const { Header, Sider, Content } = Layout;
 
-const menuItems = [
+interface MenuItem {
+  key: string;
+  icon: ReactNode;
+  label: string;
+  requiredPermission?: string;
+}
+
+const allMenuItems: MenuItem[] = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
-  { key: '/users', icon: <UserOutlined />, label: 'Kullanıcılar' },
-  { key: '/roles', icon: <CrownOutlined />, label: 'Roller' },
-  { key: '/permissions', icon: <SafetyOutlined />, label: 'Yetkiler' },
-  { key: '/tenants', icon: <TeamOutlined />, label: 'Kiracılar' },
+  { key: '/users', icon: <UserOutlined />, label: 'Kullanıcılar', requiredPermission: 'USER_READ' },
+  { key: '/roles', icon: <CrownOutlined />, label: 'Roller', requiredPermission: 'ROLE_READ' },
+  { key: '/permissions', icon: <SafetyOutlined />, label: 'Yetkiler', requiredPermission: 'PERMISSION_READ' },
+  { key: '/tenants', icon: <TeamOutlined />, label: 'Kiracılar', requiredPermission: 'TENANT_READ' },
   { key: '/settings', icon: <SettingOutlined />, label: 'Ayarlar' },
 ];
 
 export default function MainLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
+
+  const menuItems = useMemo(
+    () => allMenuItems.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission)),
+    [hasPermission],
+  );
 
   if (!user) {
     return <Navigate to="/login" replace />;

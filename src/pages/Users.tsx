@@ -20,6 +20,7 @@ import {
   type UserRoleResponse,
 } from '../services/userRoleService';
 import { getRoles, type Role } from '../services/roleService';
+import { useAuth } from '../context/AuthContext';
 
 interface Filters {
   username?: string;
@@ -30,6 +31,11 @@ interface Filters {
 }
 
 export default function Users() {
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('USER_CREATE');
+  const canUpdate = hasPermission('USER_UPDATE');
+  const canDelete = hasPermission('USER_DELETE');
+
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -322,38 +328,46 @@ export default function Users() {
       sortOrder: getSortOrder('createdDate'),
       render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
     },
-    {
+    ...((canUpdate || canDelete) ? [{
       title: 'İşlemler',
       render: (_: unknown, record: User) => (
         <Space>
-          <Button type="link" icon={<CrownOutlined />} onClick={() => openRoleDrawer(record)}>
-            Roller
-          </Button>
-          <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
-            Düzenle
-          </Button>
-          <Popconfirm
-            title="Bu kullanıcıyı silmek istediğinize emin misiniz?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Evet"
-            cancelText="Hayır"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Sil
+          {canUpdate && (
+            <Button type="link" icon={<CrownOutlined />} onClick={() => openRoleDrawer(record)}>
+              Roller
             </Button>
-          </Popconfirm>
+          )}
+          {canUpdate && (
+            <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
+              Düzenle
+            </Button>
+          )}
+          {canDelete && (
+            <Popconfirm
+              title="Bu kullanıcıyı silmek istediğinize emin misiniz?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="Evet"
+              cancelText="Hayır"
+            >
+              <Button type="link" danger icon={<DeleteOutlined />}>
+                Sil
+              </Button>
+            </Popconfirm>
+          )}
         </Space>
       ),
-    },
+    }] : []),
   ];
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>Kullanıcılar</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
-          Yeni Kullanıcı
-        </Button>
+        {canCreate && (
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
+            Yeni Kullanıcı
+          </Button>
+        )}
       </div>
 
       <Card size="small" style={{ marginBottom: 16 }}>
