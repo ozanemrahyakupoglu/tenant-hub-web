@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Tenants from './pages/Tenants';
 import Users from './pages/Users';
+import Roles from './pages/Roles';
 import Permissions from './pages/Permissions';
 import Settings from './pages/Settings';
 
@@ -20,6 +21,7 @@ export default function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/users" element={<Users />} />
+              <Route path="/roles" element={<Roles />} />
               <Route path="/permissions" element={<Permissions />} />
               <Route path="/tenants" element={<Tenants />} />
               <Route path="/settings" element={<Settings />} />

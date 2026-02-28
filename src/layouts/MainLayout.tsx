@@ -5,6 +5,7 @@ import {
   TeamOutlined,
   UserOutlined,
   SafetyOutlined,
+  CrownOutlined,
   SettingOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -18,6 +19,7 @@ const { Header, Sider, Content } = Layout;
 const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
   { key: '/users', icon: <UserOutlined />, label: 'Kullanıcılar' },
+  { key: '/roles', icon: <CrownOutlined />, label: 'Roller' },
   { key: '/permissions', icon: <SafetyOutlined />, label: 'Yetkiler' },
   { key: '/tenants', icon: <TeamOutlined />, label: 'Kiracılar' },
   { key: '/settings', icon: <SettingOutlined />, label: 'Ayarlar' },
