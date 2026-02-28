@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Drawer, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined, CrownOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import {
@@ -13,6 +13,13 @@ import {
   type UpdateUserRequest,
   type UserListParams,
 } from '../services/userService';
+import {
+  getRolesByUserId,
+  assignRoleToUser,
+  removeUserRole,
+  type UserRoleResponse,
+} from '../services/userRoleService';
+import { getRoles, type Role } from '../services/roleService';
 
 interface Filters {
   username?: string;
@@ -38,6 +45,15 @@ export default function Users() {
   const [editingRecord, setEditingRecord] = useState<User | null>(null);
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm<Filters>();
+
+  // User-Role drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerUser, setDrawerUser] = useState<User | null>(null);
+  const [userRoles, setUserRoles] = useState<UserRoleResponse[]>([]);
+  const [urLoading, setUrLoading] = useState(false);
+  const [allRoles, setAllRoles] = useState<Role[]>([]);
+  const [selectedRoleId, setSelectedRoleId] = useState<number | undefined>();
+  const [assigning, setAssigning] = useState(false);
 
   const fetchData = useCallback(async (
     page = 0,
@@ -166,6 +182,98 @@ export default function Users() {
     }
   };
 
+  // --- User-Role Drawer ---
+  const fetchUserRoles = async (userId: number) => {
+    setUrLoading(true);
+    try {
+      const ur = await getRolesByUserId(userId);
+      setUserRoles(ur);
+    } catch {
+      message.error('Kullanıcı rolleri yüklenemedi');
+    } finally {
+      setUrLoading(false);
+    }
+  };
+
+  const fetchAllRoles = async () => {
+    try {
+      const res = await getRoles({ page: 0, size: 1000 });
+      setAllRoles(res.content);
+    } catch {
+      message.error('Roller yüklenemedi');
+    }
+  };
+
+  const openRoleDrawer = async (user: User) => {
+    setDrawerUser(user);
+    setDrawerOpen(true);
+    setSelectedRoleId(undefined);
+    await Promise.all([fetchUserRoles(user.id), fetchAllRoles()]);
+  };
+
+  const handleAssignRole = async () => {
+    if (!selectedRoleId || !drawerUser) return;
+    setAssigning(true);
+    try {
+      await assignRoleToUser({ userId: drawerUser.id, roleId: selectedRoleId });
+      message.success('Rol atandı');
+      setSelectedRoleId(undefined);
+      await fetchUserRoles(drawerUser.id);
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        message.error(axiosErr.response?.data?.message || 'Rol atanamadı');
+      }
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleRemoveRole = async (urId: number) => {
+    try {
+      await removeUserRole(urId);
+      message.success('Rol kaldırıldı');
+      if (drawerUser) await fetchUserRoles(drawerUser.id);
+    } catch {
+      message.error('Rol kaldırılamadı');
+    }
+  };
+
+  const assignedRoleIds = userRoles.map((ur) => ur.roleId);
+  const availableRoles = allRoles.filter((r) => !assignedRoleIds.includes(r.id));
+
+  const urColumns = [
+    {
+      title: 'Rol Adı',
+      dataIndex: 'roleName',
+    },
+    {
+      title: 'Atanma Tarihi',
+      dataIndex: 'createdDate',
+      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+    },
+    {
+      title: 'Atayan',
+      dataIndex: 'createdBy',
+    },
+    {
+      title: 'İşlem',
+      render: (_: unknown, record: UserRoleResponse) => (
+        <Popconfirm
+          title="Bu rolü kaldırmak istediğinize emin misiniz?"
+          onConfirm={() => handleRemoveRole(record.id)}
+          okText="Evet"
+          cancelText="Hayır"
+        >
+          <Button type="link" danger icon={<DeleteOutlined />}>
+            Kaldır
+          </Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  // --- Table columns ---
   const getSortOrder = (field: string) =>
     sortField === field ? (sortOrder === 'asc' ? 'ascend' as const : 'descend' as const) : undefined;
 
@@ -218,6 +326,9 @@ export default function Users() {
       title: 'İşlemler',
       render: (_: unknown, record: User) => (
         <Space>
+          <Button type="link" icon={<CrownOutlined />} onClick={() => openRoleDrawer(record)}>
+            Roller
+          </Button>
           <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
             Düzenle
           </Button>
@@ -299,6 +410,7 @@ export default function Users() {
         onChange={handleTableChange}
       />
 
+      {/* Create / Edit Modal */}
       <Modal
         title={editingRecord ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı'}
         open={modalOpen}
@@ -341,6 +453,45 @@ export default function Users() {
           )}
         </Form>
       </Modal>
+
+      {/* User-Role Drawer */}
+      <Drawer
+        title={`${drawerUser?.username ?? ''} — Rol Yönetimi`}
+        width={640}
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setDrawerUser(null); setUserRoles([]); }}
+      >
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <Select
+            style={{ flex: 1 }}
+            placeholder="Rol seçin..."
+            value={selectedRoleId}
+            onChange={setSelectedRoleId}
+            showSearch
+            optionFilterProp="label"
+            options={availableRoles.map((r) => ({ value: r.id, label: r.name }))}
+            allowClear
+          />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleAssignRole}
+            loading={assigning}
+            disabled={!selectedRoleId}
+          >
+            Ata
+          </Button>
+        </div>
+
+        <Table
+          rowKey="id"
+          columns={urColumns}
+          dataSource={userRoles}
+          loading={urLoading}
+          pagination={false}
+          size="small"
+        />
+      </Drawer>
     </div>
   );
 }
