@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Drawer, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined, SafetyOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import {
@@ -12,6 +12,13 @@ import {
   type RoleRequest,
   type RoleListParams,
 } from '../services/roleService';
+import {
+  getPermissionsByRoleId,
+  assignPermissionToRole,
+  removeRolePermission,
+  type RolePermissionResponse,
+} from '../services/rolePermissionService';
+import { getPermissions, type Permission } from '../services/permissionService';
 
 interface Filters {
   name?: string;
@@ -34,6 +41,15 @@ export default function Roles() {
   const [editingRecord, setEditingRecord] = useState<Role | null>(null);
   const [form] = Form.useForm<RoleRequest>();
   const [filterForm] = Form.useForm<Filters>();
+
+  // Role-Permission drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerRole, setDrawerRole] = useState<Role | null>(null);
+  const [rolePermissions, setRolePermissions] = useState<RolePermissionResponse[]>([]);
+  const [rpLoading, setRpLoading] = useState(false);
+  const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+  const [selectedPermissionId, setSelectedPermissionId] = useState<number | undefined>();
+  const [assigning, setAssigning] = useState(false);
 
   const fetchData = useCallback(async (
     page = 0,
@@ -141,6 +157,98 @@ export default function Roles() {
     }
   };
 
+  // --- Role-Permission Drawer ---
+  const fetchRolePermissions = async (roleId: number) => {
+    setRpLoading(true);
+    try {
+      const rp = await getPermissionsByRoleId(roleId);
+      setRolePermissions(rp);
+    } catch {
+      message.error('Rol yetkileri yüklenemedi');
+    } finally {
+      setRpLoading(false);
+    }
+  };
+
+  const fetchAllPermissions = async () => {
+    try {
+      const res = await getPermissions({ page: 0, size: 1000 });
+      setAllPermissions(res.content);
+    } catch {
+      message.error('Yetkiler yüklenemedi');
+    }
+  };
+
+  const openPermissionDrawer = async (role: Role) => {
+    setDrawerRole(role);
+    setDrawerOpen(true);
+    setSelectedPermissionId(undefined);
+    await Promise.all([fetchRolePermissions(role.id), fetchAllPermissions()]);
+  };
+
+  const handleAssignPermission = async () => {
+    if (!selectedPermissionId || !drawerRole) return;
+    setAssigning(true);
+    try {
+      await assignPermissionToRole({ roleId: drawerRole.id, permissionId: selectedPermissionId });
+      message.success('Yetki atandı');
+      setSelectedPermissionId(undefined);
+      await fetchRolePermissions(drawerRole.id);
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        message.error(axiosErr.response?.data?.message || 'Yetki atanamadı');
+      }
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleRemovePermission = async (rpId: number) => {
+    try {
+      await removeRolePermission(rpId);
+      message.success('Yetki kaldırıldı');
+      if (drawerRole) await fetchRolePermissions(drawerRole.id);
+    } catch {
+      message.error('Yetki kaldırılamadı');
+    }
+  };
+
+  const assignedPermissionIds = rolePermissions.map((rp) => rp.permissionId);
+  const availablePermissions = allPermissions.filter((p) => !assignedPermissionIds.includes(p.id));
+
+  const rpColumns = [
+    {
+      title: 'Yetki Adı',
+      dataIndex: 'permissionName',
+    },
+    {
+      title: 'Atanma Tarihi',
+      dataIndex: 'createdDate',
+      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+    },
+    {
+      title: 'Atayan',
+      dataIndex: 'createdBy',
+    },
+    {
+      title: 'İşlem',
+      render: (_: unknown, record: RolePermissionResponse) => (
+        <Popconfirm
+          title="Bu yetkiyi kaldırmak istediğinize emin misiniz?"
+          onConfirm={() => handleRemovePermission(record.id)}
+          okText="Evet"
+          cancelText="Hayır"
+        >
+          <Button type="link" danger icon={<DeleteOutlined />}>
+            Kaldır
+          </Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  // --- Table columns ---
   const getSortOrder = (field: string) =>
     sortField === field ? (sortOrder === 'asc' ? 'ascend' as const : 'descend' as const) : undefined;
 
@@ -181,6 +289,9 @@ export default function Roles() {
       title: 'İşlemler',
       render: (_: unknown, record: Role) => (
         <Space>
+          <Button type="link" icon={<SafetyOutlined />} onClick={() => openPermissionDrawer(record)}>
+            Yetkiler
+          </Button>
           <Button type="link" icon={<EditOutlined />} onClick={() => openEditModal(record)}>
             Düzenle
           </Button>
@@ -247,6 +358,7 @@ export default function Roles() {
         onChange={handleTableChange}
       />
 
+      {/* Create / Edit Modal */}
       <Modal
         title={editingRecord ? 'Rol Düzenle' : 'Yeni Rol'}
         open={modalOpen}
@@ -276,6 +388,45 @@ export default function Roles() {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* Role-Permission Drawer */}
+      <Drawer
+        title={`${drawerRole?.name ?? ''} — Yetki Yönetimi`}
+        width={640}
+        open={drawerOpen}
+        onClose={() => { setDrawerOpen(false); setDrawerRole(null); setRolePermissions([]); }}
+      >
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <Select
+            style={{ flex: 1 }}
+            placeholder="Yetki seçin..."
+            value={selectedPermissionId}
+            onChange={setSelectedPermissionId}
+            showSearch
+            optionFilterProp="label"
+            options={availablePermissions.map((p) => ({ value: p.id, label: p.name }))}
+            allowClear
+          />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleAssignPermission}
+            loading={assigning}
+            disabled={!selectedPermissionId}
+          >
+            Ata
+          </Button>
+        </div>
+
+        <Table
+          rowKey="id"
+          columns={rpColumns}
+          dataSource={rolePermissions}
+          loading={rpLoading}
+          pagination={false}
+          size="small"
+        />
+      </Drawer>
     </div>
   );
 }
