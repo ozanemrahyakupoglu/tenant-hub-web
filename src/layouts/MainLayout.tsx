@@ -8,6 +8,7 @@ import {
   CrownOutlined,
   HomeOutlined,
   DollarOutlined,
+  WalletOutlined,
   SettingOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -33,6 +34,7 @@ const allMenuItems: MenuItem[] = [
   { key: '/permissions', icon: <SafetyOutlined />, label: 'Yetkiler', requiredPermission: 'PERMISSION_READ' },
   { key: '/real-estates', icon: <HomeOutlined />, label: 'Gayrimenkuller', requiredPermission: 'REAL_ESTATE_READ' },
   { key: '/rents', icon: <DollarOutlined />, label: 'Kiralama', requiredPermission: 'RENT_READ' },
+  { key: '/payments', icon: <WalletOutlined />, label: 'Ödemeler', requiredPermission: 'PAYMENT_READ' },
   { key: '/tenants', icon: <TeamOutlined />, label: 'Kiracılar', requiredPermission: 'TENANT_READ' },
   { key: '/settings', icon: <SettingOutlined />, label: 'Ayarlar' },
 ];
