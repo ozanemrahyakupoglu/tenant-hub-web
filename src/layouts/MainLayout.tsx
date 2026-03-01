@@ -27,7 +27,7 @@ interface MenuItem {
 const allMenuItems: MenuItem[] = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
   { key: '/users', icon: <UserOutlined />, label: 'Kullanıcılar', requiredPermission: 'USER_READ' },
-  { key: '/roles', icon: <CrownOutlined />, label: 'Roller', requiredPermission: 'ROLE_READ' },
+  { key: '/roles', icon: <CrownOutlined />, label: 'Roller', requiredPermission: 'ROLES_READ' },
   { key: '/permissions', icon: <SafetyOutlined />, label: 'Yetkiler', requiredPermission: 'PERMISSION_READ' },
   { key: '/tenants', icon: <TeamOutlined />, label: 'Kiracılar', requiredPermission: 'TENANT_READ' },
   { key: '/settings', icon: <SettingOutlined />, label: 'Ayarlar' },

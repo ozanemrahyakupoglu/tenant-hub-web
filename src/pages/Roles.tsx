@@ -28,9 +28,9 @@ interface Filters {
 
 export default function Roles() {
   const { hasPermission } = useAuth();
-  const canCreate = hasPermission('ROLE_CREATE');
-  const canUpdate = hasPermission('ROLE_UPDATE');
-  const canDelete = hasPermission('ROLE_DELETE');
+  const canCreate = hasPermission('ROLES_CREATE');
+  const canUpdate = hasPermission('ROLES_UPDATE');
+  const canDelete = hasPermission('ROLES_DELETE');
 
   const [data, setData] = useState<Role[]>([]);
   const [loading, setLoading] = useState(false);
