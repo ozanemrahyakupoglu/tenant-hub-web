@@ -47,7 +47,9 @@ export default function MainLayout() {
   const { token: { borderRadiusLG } } = theme.useToken();
 
   const menuItems = useMemo(
-    () => allMenuItems.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission)),
+    () => allMenuItems
+      .filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission))
+      .map(({ requiredPermission: _, ...item }) => item),
     [hasPermission],
   );
 

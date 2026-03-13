@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Col, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { Button, Card, Col, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
@@ -322,7 +322,7 @@ export default function Rents() {
                   min={0}
                   precision={2}
                   formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                  parser={(value) => value!.replace(/\./g, '') as unknown as number}
+                  parser={(value) => Number(value?.replace(/\./g, '') ?? 0)}
                 />
               </Form.Item>
             </Col>
