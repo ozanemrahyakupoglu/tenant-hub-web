@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://46.225.97.71:8080/api/v1';
+const API_BASE_URL = 'https://tenant-hub-backend.onbtech.com/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
