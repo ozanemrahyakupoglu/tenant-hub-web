@@ -122,6 +122,7 @@ export default function Rents() {
       rentDate: dayjs(record.rentDate),
       rentAmount: record.rentAmount,
       currency: record.currency,
+      increaseRate: record.increaseRate ?? null,
     });
     fetchAllRealEstates();
     setModalOpen(true);
@@ -136,6 +137,7 @@ export default function Rents() {
         rentDate: values.rentDate.format('YYYY-MM-DDTHH:mm:ss'),
         rentAmount: values.rentAmount,
         currency: values.currency,
+        increaseRate: values.increaseRate ?? undefined,
       };
       if (editingRecord) {
         await updateRent(editingRecord.id, payload);
@@ -196,6 +198,13 @@ export default function Rents() {
     {
       title: 'Para Birimi',
       dataIndex: 'currency',
+    },
+    {
+      title: 'Zam Oranı (%)',
+      dataIndex: 'increaseRate',
+      sorter: true,
+      sortOrder: getSortOrder('increaseRate'),
+      render: (rate?: number) => rate != null ? `%${rate.toFixed(2)}` : '—',
     },
     {
       title: 'Durum',
@@ -337,6 +346,23 @@ export default function Rents() {
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item
+            name="increaseRate"
+            label="Zam Oranı (%)"
+            rules={[
+              { type: 'number', min: 0, max: 100, message: 'Zam oranı 0-100 arasında olmalıdır' },
+            ]}
+          >
+            <InputNumber<number>
+              style={{ width: '100%' }}
+              min={0}
+              max={100}
+              precision={2}
+              step={0.01}
+              placeholder="Opsiyonel"
+              addonAfter="%"
+            />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
