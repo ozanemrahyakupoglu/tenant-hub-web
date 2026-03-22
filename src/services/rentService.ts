@@ -8,6 +8,7 @@ export interface Rent {
   rentDate: string;
   rentAmount: number;
   currency: string;
+  increaseRate?: number;
   status: string;
   createdDate: string;
   createdBy: string;
@@ -18,6 +19,7 @@ export interface RentRequest {
   rentDate: string;
   rentAmount: number;
   currency: string;
+  increaseRate?: number;
 }
 
 export interface RentListParams {
