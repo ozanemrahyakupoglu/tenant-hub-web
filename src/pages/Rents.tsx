@@ -120,6 +120,7 @@ export default function Rents() {
     form.setFieldsValue({
       realEstateId: record.realEstateId,
       rentDate: dayjs(record.rentDate),
+      paymentDueDate: dayjs(record.paymentDueDate),
       rentAmount: record.rentAmount,
       currency: record.currency,
       increaseRate: record.increaseRate ?? null,
@@ -135,6 +136,7 @@ export default function Rents() {
       const payload: RentRequest = {
         realEstateId: values.realEstateId,
         rentDate: values.rentDate.format('YYYY-MM-DDTHH:mm:ss'),
+        paymentDueDate: values.paymentDueDate.format('YYYY-MM-DDTHH:mm:ss'),
         rentAmount: values.rentAmount,
         currency: values.currency,
         increaseRate: values.increaseRate ?? undefined,
@@ -185,6 +187,13 @@ export default function Rents() {
       dataIndex: 'rentDate',
       sorter: true,
       sortOrder: getSortOrder('rentDate'),
+      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+    },
+    {
+      title: 'Son Ödeme Tarihi',
+      dataIndex: 'paymentDueDate',
+      sorter: true,
+      sortOrder: getSortOrder('paymentDueDate'),
       render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
     },
     {
@@ -321,6 +330,9 @@ export default function Rents() {
             />
           </Form.Item>
           <Form.Item name="rentDate" label="Kira Tarihi" rules={[{ required: true, message: 'Zorunlu alan' }]}>
+            <DatePicker style={{ width: '100%' }} format="DD.MM.YYYY" />
+          </Form.Item>
+          <Form.Item name="paymentDueDate" label="Son Ödeme Tarihi" rules={[{ required: true, message: 'Zorunlu alan' }]}>
             <DatePicker style={{ width: '100%' }} format="DD.MM.YYYY" />
           </Form.Item>
           <Row gutter={16}>

@@ -6,6 +6,7 @@ export interface Rent {
   realEstateId: number;
   realEstateName: string;
   rentDate: string;
+  paymentDueDate: string;
   rentAmount: number;
   currency: string;
   increaseRate?: number;
@@ -17,6 +18,7 @@ export interface Rent {
 export interface RentRequest {
   realEstateId: number;
   rentDate: string;
+  paymentDueDate: string;
   rentAmount: number;
   currency: string;
   increaseRate?: number;
