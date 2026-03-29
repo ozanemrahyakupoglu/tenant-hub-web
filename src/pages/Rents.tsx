@@ -213,7 +213,7 @@ export default function Rents() {
       dataIndex: 'increaseRate',
       sorter: true,
       sortOrder: getSortOrder('increaseRate'),
-      render: (rate?: number) => rate != null ? `%${rate.toFixed(2)}` : '—',
+      render: (rate?: number) => rate != null ? `%${rate.toFixed(2)}` : '',
     },
     {
       title: 'Durum',
@@ -367,8 +367,6 @@ export default function Rents() {
           >
             <InputNumber<number>
               style={{ width: '100%' }}
-              min={0}
-              max={100}
               precision={2}
               step={0.01}
               placeholder="Opsiyonel"
