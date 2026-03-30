@@ -1,40 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Card, Col, Row, Spin, Statistic, Typography } from 'antd';
-import { HomeOutlined, UserOutlined, DollarOutlined, WalletOutlined } from '@ant-design/icons';
+import { HomeOutlined, UserOutlined, DollarOutlined, WalletOutlined, BuildingOutlined, HomeCollectOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
-import { getRealEstates } from '../services/realEstateService';
-import { getUsers } from '../services/userService';
-import { getRents } from '../services/rentService';
-import { getPayments } from '../services/paymentService';
-
-interface Stats {
-  realEstates: number | null;
-  users: number | null;
-  rents: number | null;
-  payments: number | null;
-}
+import { getDashboardStats, type DashboardStats } from '../services/dashboardService';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<Stats>({ realEstates: null, users: null, rents: null, payments: null });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
-      const results = await Promise.allSettled([
-        getRealEstates({ page: 0, size: 1 }),
-        getUsers({ page: 0, size: 1 }),
-        getRents({ page: 0, size: 1 }),
-        getPayments({ page: 0, size: 1 }),
-      ]);
-      setStats({
-        realEstates: results[0].status === 'fulfilled' ? results[0].value.totalElements : null,
-        users: results[1].status === 'fulfilled' ? results[1].value.totalElements : null,
-        rents: results[2].status === 'fulfilled' ? results[2].value.totalElements : null,
-        payments: results[3].status === 'fulfilled' ? results[3].value.totalElements : null,
-      });
-      setLoading(false);
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch {
+        setStats(null);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchStats();
   }, []);
@@ -42,27 +27,39 @@ export default function Dashboard() {
   const statCards = [
     {
       title: 'Gayrimenkuller',
-      value: stats.realEstates,
+      value: stats?.totalRealEstates,
       icon: <HomeOutlined />,
       gradient: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
     },
     {
       title: 'Kullanıcılar',
-      value: stats.users,
+      value: stats?.totalUsers,
       icon: <UserOutlined />,
       gradient: 'linear-gradient(135deg, #10b981, #059669)',
     },
     {
       title: 'Kiralamalar',
-      value: stats.rents,
+      value: stats?.totalRents,
       icon: <DollarOutlined />,
       gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
     },
     {
       title: 'Ödemeler',
-      value: stats.payments,
+      value: stats?.totalPayments,
       icon: <WalletOutlined />,
       gradient: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+    },
+    {
+      title: 'Kiraya Verilmiş',
+      value: stats?.rentedRealEstates,
+      icon: <BuildingOutlined />,
+      gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+    },
+    {
+      title: 'Boş Gayrimenkul',
+      value: stats?.vacantRealEstates,
+      icon: <HomeCollectOutlined />,
+      gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
     },
   ];
 
