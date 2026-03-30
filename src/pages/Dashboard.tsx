@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, Col, Row, Spin, Statistic, Typography } from 'antd';
-import { HomeOutlined, UserOutlined, DollarOutlined, WalletOutlined, BuildingOutlined, HomeCollectOutlined } from '@ant-design/icons';
+import { HomeOutlined, UserOutlined, DollarOutlined, WalletOutlined, BankOutlined, ShopOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import { getDashboardStats, type DashboardStats } from '../services/dashboardService';
 
@@ -52,13 +52,13 @@ export default function Dashboard() {
     {
       title: 'Kiraya Verilmiş',
       value: stats?.rentedRealEstates,
-      icon: <BuildingOutlined />,
+      icon: <BankOutlined />,
       gradient: 'linear-gradient(135deg, #06b6d4, #0891b2)',
     },
     {
       title: 'Boş Gayrimenkul',
       value: stats?.vacantRealEstates,
-      icon: <HomeCollectOutlined />,
+      icon: <ShopOutlined />,
       gradient: 'linear-gradient(135deg, #ef4444, #dc2626)',
     },
   ];
