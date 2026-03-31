@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Col, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { Button, Card, Col, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
@@ -124,6 +124,7 @@ export default function Rents() {
       rentAmount: record.rentAmount,
       currency: record.currency,
       increaseRate: record.increaseRate ?? null,
+      note: record.note,
     });
     fetchAllRealEstates();
     setModalOpen(true);
@@ -140,6 +141,7 @@ export default function Rents() {
         rentAmount: values.rentAmount,
         currency: values.currency,
         increaseRate: values.increaseRate ?? undefined,
+        note: values.note || undefined,
       };
       if (editingRecord) {
         await updateRent(editingRecord.id, payload);
@@ -371,6 +373,20 @@ export default function Rents() {
               step={0.01}
               placeholder="Opsiyonel"
               addonAfter="%"
+            />
+          </Form.Item>
+          <Form.Item
+            name="note"
+            label="Not"
+            rules={[
+              { max: 1000, message: 'Not en fazla 1000 karakter olabilir' },
+            ]}
+          >
+            <Input.TextArea
+              rows={3}
+              maxLength={1000}
+              showCount
+              placeholder="Opsiyonel"
             />
           </Form.Item>
         </Form>
