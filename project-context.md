@@ -97,6 +97,7 @@ src/
 ├── services/
 │   ├── api.ts                  # Axios instance + request/response interceptors
 │   ├── authService.ts          # login / logout API çağrıları
+│   ├── dashboardService.ts     # getDashboardStats() → DashboardStats
 │   ├── userService.ts
 │   ├── roleService.ts
 │   ├── permissionService.ts
@@ -147,12 +148,12 @@ const canDelete = hasPermission('RESOURCE_DELETE');
 | Modül | Durum | Açıklama |
 |---|---|---|
 | Auth (Login/Logout) | ✅ Tamamlandı | JWT login, httpOnly refresh cookie, token yenileme interceptor |
-| Dashboard | ✅ Tamamlandı | Gayrimenkul, kullanıcı, kiralama, ödeme toplam sayıları |
+| Dashboard | ✅ Tamamlandı | 6 istatistik kartı: toplam gayrimenkul, kullanıcı, kiralama, ödeme + kiraya verilmiş / boş gayrimenkul |
 | Kullanıcılar | ✅ Tamamlandı | CRUD + User-Role Drawer + filtre/sıralama |
 | Roller | ✅ Tamamlandı | CRUD + Role-Permission Drawer + filtre/sıralama |
 | Yetkiler | ✅ Tamamlandı | CRUD + filtre/sıralama |
 | Gayrimenkuller | ✅ Tamamlandı | CRUD + kiracı/ev sahibi seçimi (user listesinden) + filtre/sıralama |
-| Kiralama | ✅ Tamamlandı | CRUD + gayrimenkul seçimi + para birimi + filtre/sıralama |
+| Kiralama | ✅ Tamamlandı | CRUD + gayrimenkul seçimi + para birimi + zam oranı (increaseRate) + son ödeme tarihi (paymentDueDate) + not (note) + filtre/sıralama |
 | Ödemeler | ✅ Tamamlandı | CRUD + kiralama seçimi + para birimi + filtre/sıralama |
 | Kiracılar | 🔲 Placeholder | Henüz geliştirilmedi |
 | Ayarlar | 🔲 Placeholder | Henüz geliştirilmedi |
