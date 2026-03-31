@@ -384,8 +384,7 @@ export default function Rents() {
           >
             <Input.TextArea
               rows={3}
-              maxLength={1000}
-              showCount
+              showCount={{ formatter: ({ count }) => `${count} / 1000` }}
               placeholder="Opsiyonel"
             />
           </Form.Item>
