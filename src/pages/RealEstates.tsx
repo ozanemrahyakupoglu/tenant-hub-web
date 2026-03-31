@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import dayjs from 'dayjs';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
@@ -239,7 +240,7 @@ export default function RealEstates() {
       dataIndex: 'createdDate',
       sorter: true,
       sortOrder: getSortOrder('createdDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Oluşturan',

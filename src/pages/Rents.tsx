@@ -119,8 +119,8 @@ export default function Rents() {
     setEditingRecord(record);
     form.setFieldsValue({
       realEstateId: record.realEstateId,
-      rentDate: dayjs(record.rentDate),
-      paymentDueDate: dayjs(record.paymentDueDate),
+      rentDate: dayjs(record.rentDate, 'YYYYMMDDHHmmss'),
+      paymentDueDate: dayjs(record.paymentDueDate, 'YYYYMMDDHHmmss'),
       rentAmount: record.rentAmount,
       currency: record.currency,
       increaseRate: record.increaseRate ?? null,
@@ -136,8 +136,8 @@ export default function Rents() {
       setSaving(true);
       const payload: RentRequest = {
         realEstateId: values.realEstateId,
-        rentDate: values.rentDate.format('YYYY-MM-DDTHH:mm:ss'),
-        paymentDueDate: values.paymentDueDate.format('YYYY-MM-DDTHH:mm:ss'),
+        rentDate: values.rentDate.format('YYYYMMDDHHmmss'),
+        paymentDueDate: values.paymentDueDate.format('YYYYMMDDHHmmss'),
         rentAmount: values.rentAmount,
         currency: values.currency,
         increaseRate: values.increaseRate ?? undefined,
@@ -189,14 +189,14 @@ export default function Rents() {
       dataIndex: 'rentDate',
       sorter: true,
       sortOrder: getSortOrder('rentDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Son Ödeme Tarihi',
       dataIndex: 'paymentDueDate',
       sorter: true,
       sortOrder: getSortOrder('paymentDueDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Kira Tutarı',
@@ -231,7 +231,7 @@ export default function Rents() {
       dataIndex: 'createdDate',
       sorter: true,
       sortOrder: getSortOrder('createdDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Oluşturan',

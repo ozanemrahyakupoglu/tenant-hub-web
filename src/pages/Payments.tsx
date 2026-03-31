@@ -121,7 +121,7 @@ export default function Payments() {
       rentId: record.rentId,
       amount: record.amount,
       currency: record.currency,
-      paymentDate: dayjs(record.paymentDate),
+      paymentDate: dayjs(record.paymentDate, 'YYYYMMDDHHmmss'),
     });
     fetchAllRents();
     setModalOpen(true);
@@ -135,7 +135,7 @@ export default function Payments() {
         rentId: values.rentId,
         amount: values.amount,
         currency: values.currency,
-        paymentDate: values.paymentDate.format('YYYY-MM-DDTHH:mm:ss'),
+        paymentDate: values.paymentDate.format('YYYYMMDDHHmmss'),
       };
       if (editingRecord) {
         await updatePayment(editingRecord.id, payload);
@@ -185,7 +185,7 @@ export default function Payments() {
       dataIndex: 'paymentDate',
       sorter: true,
       sortOrder: getSortOrder('paymentDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Tutar',
@@ -213,7 +213,7 @@ export default function Payments() {
       dataIndex: 'createdDate',
       sorter: true,
       sortOrder: getSortOrder('createdDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Oluşturan',
@@ -247,7 +247,7 @@ export default function Payments() {
 
   const rentOptions = allRents.map((r) => ({
     value: r.id,
-    label: `${r.realEstateName} — ${new Date(r.rentDate).toLocaleDateString('tr-TR')}`,
+    label: `${r.realEstateName} — ${dayjs(r.rentDate, 'YYYYMMDDHHmmss').format('DD.MM.YYYY')}`,
   }));
 
   return (

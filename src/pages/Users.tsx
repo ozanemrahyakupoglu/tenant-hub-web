@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Col, Drawer, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined, CrownOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import {
@@ -256,7 +257,7 @@ export default function Users() {
     {
       title: 'Atanma Tarihi',
       dataIndex: 'createdDate',
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     {
       title: 'Atayan',
@@ -326,7 +327,7 @@ export default function Users() {
       dataIndex: 'createdDate',
       sorter: true,
       sortOrder: getSortOrder('createdDate'),
-      render: (date: string) => new Date(date).toLocaleDateString('tr-TR'),
+      render: (date: string) => dayjs(date, 'YYYYMMDDHHmmss').format('DD.MM.YYYY'),
     },
     ...((canUpdate || canDelete) ? [{
       title: 'İşlemler',
