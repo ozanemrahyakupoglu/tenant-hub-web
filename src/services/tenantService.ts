@@ -4,9 +4,7 @@ import type { PageResponse } from './userService';
 export interface Tenant {
   id: number;
   usersId: number;
-  userName: string;
-  firstName: string;
-  lastName: string;
+  usersFullName: string;
   status: string;
   createdDate: string;
   createdBy: string;
@@ -20,7 +18,6 @@ export interface TenantListParams {
   page: number;
   size: number;
   sort?: string;
-  userName?: string;
 }
 
 export async function getTenants(params: TenantListParams): Promise<PageResponse<Tenant>> {

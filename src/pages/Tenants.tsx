@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { Button, Form, message, Modal, Popconfirm, Select, Space, Table, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import {
@@ -16,10 +16,6 @@ import {
 import { getUsers, type User } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
 
-interface Filters {
-  userName?: string;
-}
-
 export default function Tenants() {
   const { hasPermission } = useAuth();
   const canCreate = hasPermission('TENANT_CREATE');
@@ -33,27 +29,22 @@ export default function Tenants() {
     pageSize: 10,
     total: 0,
   });
-  const [sortField, setSortField] = useState('userName');
+  const [sortField, setSortField] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [filters, setFilters] = useState<Filters>({});
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Tenant | null>(null);
   const [form] = Form.useForm<TenantRequest>();
-  const [filterForm] = Form.useForm<Filters>();
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   const fetchData = useCallback(async (
     page = 0,
     size = 10,
     sort = `${sortField},${sortOrder}`,
-    currentFilters = filters,
   ) => {
     setLoading(true);
     try {
       const params: TenantListParams = { page, size, sort };
-      if (currentFilters.userName) params.userName = currentFilters.userName;
-
       const res = await getTenants(params);
       setData(res.content);
       setPagination((prev) => ({
@@ -67,7 +58,7 @@ export default function Tenants() {
     } finally {
       setLoading(false);
     }
-  }, [sortField, sortOrder, filters]);
+  }, [sortField, sortOrder]);
 
   useEffect(() => {
     fetchData();
@@ -92,19 +83,7 @@ export default function Tenants() {
     const newOrder = s.order === 'descend' ? 'desc' : 'asc';
     setSortField(newField);
     setSortOrder(newOrder);
-    fetchData((pag.current ?? 1) - 1, pag.pageSize ?? 10, `${newField},${newOrder}`, filters);
-  };
-
-  const handleFilterSearch = () => {
-    const values = filterForm.getFieldsValue();
-    setFilters(values);
-    fetchData(0, pagination.pageSize ?? 10, `${sortField},${sortOrder}`, values);
-  };
-
-  const handleFilterReset = () => {
-    filterForm.resetFields();
-    setFilters({});
-    fetchData(0, pagination.pageSize ?? 10, `${sortField},${sortOrder}`, {});
+    fetchData((pag.current ?? 1) - 1, pag.pageSize ?? 10, `${newField},${newOrder}`);
   };
 
   const openCreateModal = () => {
@@ -161,22 +140,9 @@ export default function Tenants() {
 
   const columns = [
     {
-      title: 'Kullanıcı Adı',
-      dataIndex: 'userName',
-      sorter: true,
-      sortOrder: getSortOrder('userName'),
-    },
-    {
-      title: 'Ad',
-      dataIndex: 'firstName',
-      sorter: true,
-      sortOrder: getSortOrder('firstName'),
-    },
-    {
-      title: 'Soyad',
-      dataIndex: 'lastName',
-      sorter: true,
-      sortOrder: getSortOrder('lastName'),
+      title: 'Ad Soyad',
+      dataIndex: 'usersFullName',
+      sorter: false,
     },
     {
       title: 'Durum',
@@ -239,28 +205,6 @@ export default function Tenants() {
           </Button>
         )}
       </div>
-
-      <Card size="small" style={{ marginBottom: 16 }}>
-        <Form form={filterForm} layout="vertical">
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="userName" label="Kullanıcı Adı" style={{ marginBottom: 0 }}>
-                <Input placeholder="Ara..." allowClear />
-              </Form.Item>
-            </Col>
-            <Col span={4} style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <Space>
-                <Button type="primary" icon={<SearchOutlined />} onClick={handleFilterSearch}>
-                  Ara
-                </Button>
-                <Button icon={<ClearOutlined />} onClick={handleFilterReset}>
-                  Temizle
-                </Button>
-              </Space>
-            </Col>
-          </Row>
-        </Form>
-      </Card>
 
       <Table
         rowKey="id"
