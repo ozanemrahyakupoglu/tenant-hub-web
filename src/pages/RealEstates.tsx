@@ -130,6 +130,7 @@ export default function RealEstates() {
       district: record.district,
       neighborhood: record.neighborhood,
       address: record.address,
+      note: record.note,
       tenantId: record.tenantId,
       landlordId: record.landlordId,
     });
@@ -192,6 +193,18 @@ export default function RealEstates() {
           </Tooltip>
         ) : (
           text
+        ),
+    },
+    {
+      title: 'Not',
+      dataIndex: 'note',
+      render: (text: string) =>
+        text && text.length > 50 ? (
+          <Tooltip title={text}>
+            <span>{text.slice(0, 50)}...</span>
+          </Tooltip>
+        ) : (
+          text || '-'
         ),
     },
     {
@@ -376,6 +389,9 @@ export default function RealEstates() {
           </Row>
           <Form.Item name="address" label="Adres" rules={[{ required: true, message: 'Zorunlu alan' }, { max: 500, message: 'En fazla 500 karakter' }]}>
             <Input.TextArea rows={2} />
+          </Form.Item>
+          <Form.Item name="note" label="Not" rules={[{ max: 1000, message: 'En fazla 1000 karakter' }]}>
+            <Input.TextArea rows={3} />
           </Form.Item>
           <Row gutter={16}>
             <Col span={12}>

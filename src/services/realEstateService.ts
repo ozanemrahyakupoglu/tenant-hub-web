@@ -10,6 +10,7 @@ export interface RealEstate {
   district: string;
   neighborhood: string;
   address: string;
+  note?: string;
   tenantId: number | null;
   tenantName: string | null;
   landlordId: number | null;
@@ -27,6 +28,7 @@ export interface RealEstateRequest {
   district: string;
   neighborhood: string;
   address: string;
+  note?: string;
   tenantId?: number | null;
   landlordId?: number | null;
 }
