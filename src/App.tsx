@@ -6,6 +6,7 @@ import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Tenants from './pages/Tenants';
+import Landlords from './pages/Landlords';
 import Users from './pages/Users';
 import Roles from './pages/Roles';
 import Permissions from './pages/Permissions';
@@ -95,6 +96,7 @@ export default function App() {
               <Route path="/rents" element={<Rents />} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/tenants" element={<Tenants />} />
+              <Route path="/landlords" element={<Landlords />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

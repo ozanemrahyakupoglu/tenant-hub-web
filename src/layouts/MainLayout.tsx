@@ -13,6 +13,7 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 import type { ReactNode } from 'react';
 import { Outlet, useNavigate, useLocation, Navigate } from 'react-router-dom';
@@ -36,6 +37,7 @@ const allMenuItems: MenuItem[] = [
   { key: '/rents', icon: <DollarOutlined />, label: 'Kiralama', requiredPermission: 'RENT_READ' },
   { key: '/payments', icon: <WalletOutlined />, label: 'Ödemeler', requiredPermission: 'PAYMENT_READ' },
   { key: '/tenants', icon: <TeamOutlined />, label: 'Kiracılar', requiredPermission: 'TENANT_READ' },
+  { key: '/landlords', icon: <KeyOutlined />, label: 'Ev Sahipleri', requiredPermission: 'LANDLORD_READ' },
   { key: '/settings', icon: <SettingOutlined />, label: 'Ayarlar' },
 ];
 
