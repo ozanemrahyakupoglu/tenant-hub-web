@@ -7,6 +7,8 @@ export interface DashboardStats {
   totalPayments: number;
   rentedRealEstates: number;
   vacantRealEstates: number;
+  totalTenants: number;
+  totalLandlords: number;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
