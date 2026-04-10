@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Col, DatePicker, Form, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import { Button, Card, Col, DatePicker, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Typography } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { TablePaginationConfig } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
@@ -122,6 +122,7 @@ export default function Payments() {
       amount: record.amount,
       currency: record.currency,
       paymentDate: dayjs(record.paymentDate, 'YYYYMMDDHHmmss'),
+      note: record.note,
     });
     fetchAllRents();
     setModalOpen(true);
@@ -136,6 +137,7 @@ export default function Payments() {
         amount: values.amount,
         currency: values.currency,
         paymentDate: values.paymentDate.format('YYYYMMDDHHmmss'),
+        note: values.note || undefined,
       };
       if (editingRecord) {
         await updatePayment(editingRecord.id, payload);
@@ -218,6 +220,11 @@ export default function Payments() {
     {
       title: 'Oluşturan',
       dataIndex: 'createdBy',
+    },
+    {
+      title: 'Not',
+      dataIndex: 'note',
+      render: (note: string) => note || '-',
     },
     ...((canUpdate || canDelete) ? [{
       title: 'İşlemler',
@@ -339,6 +346,19 @@ export default function Payments() {
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item
+            name="note"
+            label="Not"
+            rules={[
+              { max: 1000, message: 'Not en fazla 1000 karakter olabilir' },
+            ]}
+          >
+            <Input.TextArea
+              rows={3}
+              showCount={{ formatter: ({ count }) => `${count} / 1000` }}
+              placeholder="Opsiyonel"
+            />
+          </Form.Item>
         </Form>
       </Modal>
     </div>

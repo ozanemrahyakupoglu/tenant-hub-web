@@ -10,6 +10,7 @@ export interface Payment {
   status: string;
   createdDate: string;
   createdBy: string;
+  note?: string;
 }
 
 export interface PaymentRequest {
@@ -17,6 +18,7 @@ export interface PaymentRequest {
   amount: number;
   currency: string;
   paymentDate: string;
+  note?: string;
 }
 
 export interface PaymentListParams {
